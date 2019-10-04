@@ -16,7 +16,7 @@ class ValueIterationRCNN:
         run
         value_function
         
-    Refference:
+    Reference:
         arXiv: 1701.02392
     """
     def __init__(self, state_dim, action_dim, transition_model, 
@@ -64,9 +64,12 @@ class ValueIterationRCNN:
         return
          
     
-class BeliefPropagationRCNN:    
+class BeliefPropagationRCNN:  
+    
     def __init__(self, state_dim, action_dim, choice, observation_model, 
                  belief, target_belief, max_step, neighbor_width, learning_rate):
+        """
+        """
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.choice = choice
@@ -74,9 +77,9 @@ class BeliefPropagationRCNN:
         self.transition_model = tf.Variable(tf.random.uniform([self.state_dim, self.state_dim, 
                                                                1, self.action_dim],                                
                                                                 0.0, 1.0,
-                                                                dtype=tf.dtypes.float64))
+                                                                dtype=tf.dtypes.float64),
+                                            constraint=lambda t: tf.clip_by_value(t, 0, 1))
         self.belief = belief
-        # TODO: turn to target belief(s) and add slicing
         self.target_belief = target_belief
         self.max_step = max_step
         self.learning_rate = learning_rate
@@ -110,7 +113,7 @@ class BeliefPropagationRCNN:
     def run(self, sess=None):
         if not sess: 
             sess = tf.Session()
-        sess.run(self.initialize_variables)
+        #sess.run(self.initialize_variables)
         sess.run(self._build_model())
         print("In entry BP RCNN")
         for epoch in range(self.max_step):
@@ -120,9 +123,12 @@ class BeliefPropagationRCNN:
         
     
 class QMDP_RCNN:
-    def __init__(self, state_dim, action_dim, belief, action_choices, 
+    
+    def __init__(self, state_dim, action_dim, belief, action_choices, observations,
                  observation_model, target_belief, discount_factor, 
                  max_step, neighbor_width, learning_rate):
+        """
+        """
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.Q_value = tf.placeholder(dtype=tf.dtypes.float64, 
@@ -137,7 +143,6 @@ class QMDP_RCNN:
         self.transition_model = tf.placeholder(dtype=tf.dtypes.float64, 
                                       shape=[self.state_dim, self.state_dim,
                                              1, self.action_dim])
-        # TODO
         self.observation_model = observation_model
         # TODO
         self.target_belief = target_belief
@@ -147,21 +152,21 @@ class QMDP_RCNN:
         self.learning_rate = learning_rate
         self.initialize_variables = tf.initialize_all_variables()
     
-    def _build_observation_model(self):
-       
     def _target_action(self):
-        
+        pass
     
     def _build_model(self, sess):
-        BP_RCNN = BeliefPropagationRCNN(self.state_dim, self.action_dim, self.observation_model, 
+        choise = 2
+        BP_RCNN = BeliefPropagationRCNN(self.state_dim, self.action_dim, choise, self.observation_model, 
                  self.belief, self.target_belief, self.max_step, self.neighbor_width, self.learning_rate)
-        BP_RCNN.run(sess)
+        sess.run(BP_RCNN.initialize_variables)
+        BP_RCNN._build_model()
         self.belief = BP_RCNN.belief
         self.transition_model = BP_RCNN.transition_model
         
         VI_RCNN = ValueIterationRCNN(self.state_dim, self.action_dim, self.transition_model, 
                  self.reward_function, self.discount_factor, self.max_step, self.neighbor_width)
-        VI_RCNN.run(sess)
+        VI_RCNN._build_model()
         self.Q_value = VI_RCNN.Q_value
         
         #print(self.belief, self.Q_value)
@@ -191,12 +196,6 @@ class QMDP_RCNN:
             for epoch in range(self.max_step):
                 _, loss = sess.run(self._train_model(sess))
                 print('epoch %d, loss=' %epoch, loss)
-        return
-    
-    def update(self, belief, action_choices, observations):  
-        self.belief = belief
-        self.action_choices = action_choices
-        self.observations = observations
         return
         
     
@@ -241,9 +240,11 @@ if __name__ == '__main__':
     
     target_action = tf.constant([1, 0, 0, 1, 0], dtype=tf.dtypes.float64, shape=[action_dim])
     
-    agent = QMDP_RCNN(state_dim, action_dim, belief, target_action, 
+    action_choices = []
+    observations = []
+    
+    agent = QMDP_RCNN(state_dim, action_dim, belief, action_choices, observations,
                  observation_model, target_belief, discount_factor, 
-                 max_step, neighbor_width, learning_rate)
+                 max_step, neighbor_width, learning_rate, target_action)
     
     agent.run()
-
