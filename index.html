@@ -8,12 +8,11 @@
 <body>
 <h1>Google reCAPTCHA test</h1>
 <p>Adds the vanilla <a href="https://www.google.com/recaptcha">reCAPTCHA</a> widget, for testing...</p>
-<div class="g-recaptcha">
-    <script>
-    grecaptcha.ready(function() {
-        grecaptcha.execute('6Leh5LsUAAAAAPXeMPhIXJAm773IqCEL0rap5ZRW', {action: 'homepage'});
-    });
-    </script>
+<script>
+grecaptcha.ready(function() {
+    grecaptcha.execute('6Leh5LsUAAAAAPXeMPhIXJAm773IqCEL0rap5ZRW', {action: 'homepage'});
+});
+</script>
 </div>
 </body>
 </html>
