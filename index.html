@@ -10,7 +10,9 @@
 <p>Adds the vanilla <a href="https://www.google.com/recaptcha">reCAPTCHA</a> widget, for testing...</p>
 <script>
 grecaptcha.ready(function() {
-    grecaptcha.execute('6Leh5LsUAAAAAPXeMPhIXJAm773IqCEL0rap5ZRW', {action: 'homepage'});
+    grecaptcha.execute('6Leh5LsUAAAAAPXeMPhIXJAm773IqCEL0rap5ZRW', {action: 'homepage'}).then(function(token) {
+       window.alert('you did it!');
+    });
 });
 </script>
 </div>
