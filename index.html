@@ -3,11 +3,19 @@
 <head>
 <title>Google reCAPTCHA test</title>
 <meta charset=utf-8>
-<script src='https://www.google.com/recaptcha/api.js'></script>
+<script src="https://www.google.com/recaptcha/api.js?render=_reCAPTCHA_site_key"></script>
 </head>
 <body>
 <h1>Google reCAPTCHA test</h1>
 <p>Adds the vanilla <a href="https://www.google.com/recaptcha">reCAPTCHA</a> widget, for testing...</p>
-<div class="g-recaptcha" data-sitekey="6Leh5LsUAAAAAPXeMPhIXJAm773IqCEL0rap5ZRW"></div>
+<div class="g-recaptcha">
+    <script>
+    grecaptcha.ready(function() {
+        grecaptcha.execute('6Leh5LsUAAAAADtSLBErCOqgoIYhS_bcFoGka-Zu', {action: 'homepage'});
+    });
+    </script>
+</div>
 </body>
 </html>
+
+
