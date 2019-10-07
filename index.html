@@ -1,23 +1,15 @@
-<!DOCTYPE html>
 <html>
-<head>
-<title>Google reCAPTCHA test</title>
-<meta charset=utf-8>
-</head>
-<body>
-<h1>Google reCAPTCHA test</h1>
-<p>Adds the vanilla <a href="https://www.google.com/recaptcha">reCAPTCHA</a> widget, for testing...</p>
-<script src="https://www.google.com/recaptcha/api.js?render=6Leh5LsUAAAAADtSLBErCOqgoIYhS_bcFoGka-Zu"></script>
-<script>
-grecaptcha.ready(function() {
-    grecaptcha.execute('6Leh5LsUAAAAAPXeMPhIXJAm773IqCEL0rap5ZRW', {action: 'homepage'}).then(function(token) {
-       document.getElementById('g-recaptcha-response').value = token;
-       console.log('you did it!');
-    });
-});
-</script>
-</div>
-</body>
+  <head>
+    <title>reCAPTCHA demo: Simple page</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  </head>
+  <body>
+    <form action="?" method="POST">
+      <div class="g-recaptcha" data-sitekey="6Leh5LsUAAAAADtSLBErCOqgoIYhS_bcFoGka-Zu"></div>
+      <br/>
+      <input type="submit" value="Submit">
+    </form>
+  </body>
 </html>
 
 
