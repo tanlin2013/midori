@@ -4,10 +4,11 @@ sys.path.insert(0, os.path.abspath('../'))
 from lib.DQN import DQN
 from envs.recaptcha import Recaptcha
 
+
 class GuiAgent(Recaptcha):
-    
+
     def __init__(self):
-        super(GuiAgent,self).__init__()
+        super(GuiAgent, self).__init__()
         self.lattice_size = 100
         self.n_actions = 8
         self.n_states = 2
@@ -15,7 +16,7 @@ class GuiAgent(Recaptcha):
         self.DQN_params = {
                 "batch_size": 32,
                 "learning_rate": 0.01,
-                "epsilon": 0.9, # greedy ratio
+                "epsilon": 0.9,  # greedy ratio
                 "reward_discount": 0.9,
                 "target_update_freq": 100,
                 "mem_capacity": 2000}
