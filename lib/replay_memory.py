@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import random
-from collection import namedtuple
+from collections import namedtuple
 
 
 Transition = namedtuple('Transition',

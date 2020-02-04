@@ -36,6 +36,7 @@ class OpencvWrapper:
         template_gray = OpencvWrapper.image_gray(template_rgb)
         
         size = np.asarray(template_gray.shape[::-1])
+        print(size)
         #  TODO: https://docs.opencv.org/2.4/modules/imgproc/doc/object_detection.html?highlight=matchtemplate#matchtemplate
         res = cv2.matchTemplate(img_gray, template_gray, cv2.TM_CCOEFF_NORMED)
 #        loc = np.where(res >= precision)
