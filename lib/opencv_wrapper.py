@@ -29,15 +29,29 @@ class OpencvWrapper:
     
     @staticmethod
     def search_image(background, template_path, precision=0.95):
+        """
+        Search a given image (template) from background by using cv2.matchTemplate
+        
+        Args:
+            background
+            template_path
+            precision
+            
+        Returns:
+            coordinate
+            res
+            
+        Ref:
+            https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_template_matching/py_template_matching.html
+            https://docs.opencv.org/2.4/modules/imgproc/doc/object_detection.html?highlight=matchtemplate#matchtemplate
+        """
         img_rgb = np.array(background)
         img_gray = OpencvWrapper.image_gray(img_rgb)
         template_rgb = cv2.imread(template_path)
         if template_rgb is None: raise TypeError("Image is not found in path: {}".format(template_path))
         template_gray = OpencvWrapper.image_gray(template_rgb)
         
-        size = np.asarray(template_gray.shape[::-1])
-        print(size)
-        #  TODO: https://docs.opencv.org/2.4/modules/imgproc/doc/object_detection.html?highlight=matchtemplate#matchtemplate
+        size = np.asarray(template_gray.shape[::-1]) 
         res = cv2.matchTemplate(img_gray, template_gray, cv2.TM_CCOEFF_NORMED)
 #        loc = np.where(res >= precision)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)

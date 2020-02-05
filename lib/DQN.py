@@ -10,12 +10,12 @@ class Net(nn.Module):
 
     def __init__(self, h, w, outputs):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(1, 16, kernel_size=5, stride=2)
-        self.bn1 = nn.BatchNorm2d(16)
-        self.conv2 = nn.Conv2d(16, 32, kernel_size=5, stride=2)
-        self.bn2 = nn.BatchNorm2d(32)
-        self.conv3 = nn.Conv2d(32, 32, kernel_size=5, stride=2)
-        self.bn3 = nn.BatchNorm2d(32)
+        self.conv1 = nn.Conv2d(1, 8, kernel_size=5, stride=2)
+        self.bn1 = nn.BatchNorm2d(8)
+        self.conv2 = nn.Conv2d(8, 16, kernel_size=5, stride=2)
+        self.bn2 = nn.BatchNorm2d(16)
+        self.conv3 = nn.Conv2d(16, 16, kernel_size=5, stride=2)
+        self.bn3 = nn.BatchNorm2d(16)
 
         # Number of Linear input connections depends on output of conv2d layers
         # and therefore the input image size, so compute it.
@@ -23,28 +23,33 @@ class Net(nn.Module):
             return (size - (kernel_size - 1) - 1) // stride  + 1
         convw = conv2d_size_out(conv2d_size_out(conv2d_size_out(w)))
         convh = conv2d_size_out(conv2d_size_out(conv2d_size_out(h)))
-        linear_input_size = convw * convh * 32
+        linear_input_size = convw * convh * 16
         self.head = nn.Linear(linear_input_size, outputs)
 
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
     def forward(self, x):
-        x = nn.functional.relu(self.bn1(self.conv1(x)))
-        x = nn.functional.relu(self.bn2(self.conv2(x)))
-        x = nn.functional.relu(self.bn3(self.conv3(x)))
+# =============================================================================
+#         x = nn.functional.relu(self.bn1(self.conv1(x)))
+#         x = nn.functional.relu(self.bn2(self.conv2(x)))
+#         x = nn.functional.relu(self.bn3(self.conv3(x)))
+# =============================================================================
+        x = self.bn1(self.conv1(x))
+        x = self.bn2(self.conv2(x))
+        x = self.bn3(self.conv3(x))
+        x = torch.sigmoid(x)
         return self.head(x.view(x.size(0), -1))
 
 
-class DQN(object):
+class DQN:
     
     def __init__(self, screen_height, screen_width, n_actions):
         self.n_actions = n_actions
-        self.batch_size = 512
-        self.gamma = 0.999
+        self.batch_size = 2
+        self.gamma = 0.9
         self.eps_start = 0.9
         self.eps_end = 0.05
         self.eps_decay = 200
-        self.target_update = 10
         
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.policy_net = Net(screen_height, screen_width, n_actions).to(self.device)
@@ -52,7 +57,8 @@ class DQN(object):
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
 
-        self.optimizer = optim.RMSprop(self.policy_net.parameters())
+        #self.optimizer = optim.RMSprop(self.policy_net.parameters())
+        self.optimizer = optim.Adam(self.policy_net.parameters())
         self.memory = ReplayMemory(10000)
 
         self.steps_done = 0
@@ -107,12 +113,12 @@ class DQN(object):
 
         # Compute Huber loss
         loss = nn.functional.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
-
+        # loss = nn.functional.mse_loss(state_action_values, expected_state_action_values.unsqueeze(1))
         # Optimize the model
         self.optimizer.zero_grad()
         loss.backward()
         for param in self.policy_net.parameters():
             param.grad.data.clamp_(-1, 1)
         self.optimizer.step()
-        return
+        return loss.item()
         

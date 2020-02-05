@@ -27,7 +27,7 @@ class Recaptcha:
             T_{tau} is a natural number space for required time of a step, and tau is the maximum time of a step
         
     """
-    def __init__(self, max_step_width=30, max_step_t=3):
+    def __init__(self, max_step_width=10, max_step_t=1):
         self.resolution = pyautogui.size()
         self.max_step_width = max_step_width
         self.max_step_t = max_step_t
@@ -70,13 +70,13 @@ class Recaptcha:
     def step(self, action_idx):
         assert self.action_space.contains(action_idx), "%r (%s) invalid"%(action_idx, type(action_idx))
         unitstep, step_width, t = self.action_hashtable(action_idx)
-        self.state = np.add(self.state, step_width*unitstep)
+        self.state = np.add(self.state, 4*step_width*unitstep)
         self.update_state(t)
-        done = np.allclose(self.state, self.goal, atol=20, rtol=1e-2)
+        done = np.allclose(self.state, self.goal, atol=50, rtol=1e-1)
         done = bool(done)
         
         if not done:
-            reward = 1.0
+            reward = -0.1
         elif self.steps_beyond_done is None:
             self.steps_beyond_done = 0
             reward = 1.0
@@ -87,13 +87,14 @@ class Recaptcha:
             reward = 0.0
         
         eu_dist = np.linalg.norm(self.goal-self.state)
-        reward += 1e+2 * (self.last_eu_dist - eu_dist)/np.linalg.norm(np.array(self.resolution))
+        reward += np.tanh(self.last_eu_dist - eu_dist)
+        reward += 2*np.exp(-0.01*eu_dist)
         self.last_eu_dist = eu_dist
         
         return self.state, done, reward
     
     def reset(self):
-        self.state = self.observation_space.sample()
+        self.state = np.array([300, 300])  #self.observation_space.sample()
         self.update_state()
         self.steps_beyond_done = None
         return

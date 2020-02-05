@@ -426,7 +426,6 @@ def optimize_model():
         param.grad.data.clamp_(-1, 1)
     optimizer.step()
 
-
 ######################################################################
 #
 # Below, you can find the main training loop. At the beginning we reset

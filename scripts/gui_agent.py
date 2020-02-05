@@ -21,8 +21,11 @@ class GuiAgent:
         self.agent = DQN(screen_height, screen_width, n_actions)
         self.DQN_params = {}
         self.n_episodes = 50
+        self.target_update = 10
         self.episode_durations = []
-    
+        
+        self.background = np.random.randint(10, 20, size=self.env.resolution)
+        
     def plot_durations(self):
         # set up matplotlib
         is_ipython = 'inline' in matplotlib.get_backend()
@@ -50,8 +53,8 @@ class GuiAgent:
         return
     
     def get_screen(self, position):
-        I = np.zeros(self.env.resolution)
-        I[position[0]][position[1]] = 1
+        I = np.copy(self.background)
+        I[position[0]][position[1]] = 255
         
         # Convert to float, rescale, convert to torch tensor (CHW)
         # (this doesn't require a copy)
@@ -74,7 +77,7 @@ class GuiAgent:
                 # Select and perform an action
                 action = self.agent.select_action(state)
                 _, done, reward = self.env.step(action.item())
-                print(t, reward)
+                tmp = reward
                 reward = torch.tensor([reward], device=self.agent.device)
                 
                 # Observe new state
@@ -90,13 +93,14 @@ class GuiAgent:
                 state = next_state
 
                 # Perform one step of the optimization (on the target network)
-                self.agent.optimize_model()
+                loss = self.agent.optimize_model()
+                print("step {}, get reward {} with loss {}".format(t, tmp, loss))
                 if done:
                     self.episode_durations.append(t + 1)
                     self.plot_durations()
                     break
             # Update the target network, copying all weights and biases in DQN
-            if i_episode % self.agent.target_update == 0:
+            if i_episode % self.target_update == 0:
                 self.agent.target_net.load_state_dict(self.agent.policy_net.state_dict())
 
         print('Complete')
@@ -106,5 +110,8 @@ class GuiAgent:
 
 if __name__ == '__main__':
 
+    import warnings
+    warnings.filterwarnings("ignore")
+    
     agent = GuiAgent()
     agent.render()
